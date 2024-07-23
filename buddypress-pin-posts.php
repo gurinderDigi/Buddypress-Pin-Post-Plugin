@@ -321,9 +321,7 @@ class BuddyPressPinPosts {
                 
               
             }
-             else {
-               // echo 'No reactions found for this activity.';
-            }
+            
         }
 
         // Recursive function to display comments and their children
