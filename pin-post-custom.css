@@ -1,0 +1,44 @@
+i.fa-solid.fa-thumbtack {
+    font-size: 26px;
+    color: #952a7e;
+    position: absolute;
+    right: 9px;
+    bottom: -25px;
+}
+.pinClass {
+    text-align: end;
+}
+.activity-list.item-list.bp-list.custom .activity-list.item-list.bp-list.custom {
+    display:none;
+}
+
+/*
+.who-reacted.custom:nth-child(n+2) {
+    display: none;
+}
+
+
+.who-reacted:nth-child(n+3):not(.custom) {
+    display: none;
+}
+*/
+
+
+ul.activity-list.item-list.bp-list.custom .activity.pinnedPosts {
+    display: block;
+}
+ul.activity-list.item-list.bp-list.custom .activity {
+    display: none;
+}
+ul.activity-list.item-list.bp-list ul.activity-list.item-list.bp-list.custom {
+    display: none;
+}
+
+.beehive-activity-widget ul.activity-list.item-list.bp-list.custom {
+    display: none;
+}
+.custom .activity-item .who-reacted .top-reactions {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
