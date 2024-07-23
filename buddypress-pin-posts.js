@@ -94,6 +94,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Bind the function to the AJAX complete event
     $(document).ajaxComplete(handleAjaxComplete);
 
-    // Trigger the function once after the initial page load
+ 
     setTimeout(afterActivityLoaded, 500); // Slight delay to ensure DOM updates
 });
