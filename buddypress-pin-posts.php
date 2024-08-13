@@ -21,9 +21,10 @@ class BuddyPressPinPosts {
         add_action('bp_activity_entry_meta', [$this, 'add_pin_button']);
         add_action('wp_enqueue_scripts', [$this, 'enqueue_scripts']);
 		add_filter( 'bp_has_activities', [$this,'bp_custom_activity_feed'], 10, 2 );
-       
-       
+      
     }
+ 
+    
 
     public function create_table() {
 
@@ -49,30 +50,24 @@ class BuddyPressPinPosts {
         
     }
 
+   
     public function add_pin_button() {
-    
-        if (is_user_logged_in() && bp_get_activity_type() == 'activity_update' || bp_get_activity_type() == 'rtmedia_update') {
-
-            if(current_user_can('administrator')){
-           
-
-           
-                    $post_id = bp_get_activity_id();
-                    $user_id = get_current_user_id();
-                    global $wpdb;
-                    $table_name = $wpdb->prefix . 'bp_pinned_posts';
-                    $is_pinned = $wpdb->get_var($wpdb->prepare(
-                        "SELECT COUNT(*) FROM $table_name WHERE post_id = %d AND user_id = %d",
-                        $post_id, $user_id
-                    ));
-                    $button_text = $is_pinned ? 'Unpin' : 'Pin';
-                    $action = $is_pinned ? 'unpin_post' : 'pin_post';
-
-                    echo '<a href="javascript:void(0)" class="pin-post-button" data-post-id="' . $post_id . '" data-action="' . $action . '">' . $button_text . '</a>';
-                }
-            
-        } 
+        if (is_user_logged_in() && (bp_get_activity_type() == 'activity_update' || bp_get_activity_type() == 'rtmedia_update')) {
+            $post_id = bp_get_activity_id();
+           $activity_user_id = bp_get_activity_user_id(); // Get the user ID of the activity
         
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'bp_pinned_posts';
+        $is_pinned = $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM $table_name WHERE post_id = %d AND activity_user_id = %d",
+            $post_id, $activity_user_id
+        ));
+        
+        $button_text = $is_pinned ? 'Unpin' : 'Pin';
+        $action = $is_pinned ? 'unpin_post' : 'pin_post';
+    
+            echo '<a href="javascript:void(0)" class="pin-post-button" data-user-id="'.$activity_user_id.'" data-post-id="' . $post_id . '" data-action="' . $action . '">' . $button_text . '</a>';
+        }
     }
     
 
@@ -82,7 +77,8 @@ class BuddyPressPinPosts {
         }
 
         $post_id = intval($_POST['post_id']);
-        $user_id = get_current_user_id();
+        $user_id = intval($_POST['user_id']);
+        
         global $wpdb;
         $table_name = $wpdb->prefix . 'bp_pinned_posts';
 
@@ -101,7 +97,8 @@ class BuddyPressPinPosts {
         }
 
         $post_id = intval($_POST['post_id']);
-        $user_id = get_current_user_id();
+        $user_id = intval($_POST['user_id']);
+       
         global $wpdb;
         $table_name = $wpdb->prefix . 'bp_pinned_posts';
 
@@ -114,13 +111,12 @@ class BuddyPressPinPosts {
         wp_send_json_success('Post unpinned successfully');
     }
 
-  
+    
 
 
 	function bp_custom_activity_feed($has_activities, $args) {
-       
-    
-		global $wpdb;
+        
+        global $wpdb;
 		$user_id = get_current_user_id();
 		$table_name = $wpdb->prefix . 'bp_pinned_posts';
 	
@@ -140,15 +136,16 @@ class BuddyPressPinPosts {
 			// Sort pinned posts in descending order
 			//rsort($pinned_posts);
 	
-			echo '<ul class="activity-list item-list bp-list custom">';
+			echo '<ul class="activity-list custom customClass" >';
 	
 			// Loop through each pinned post ID
 			foreach ($pinned_posts as $post_id) {
 				// Fetch the specific activity
 				$custom_activities = bp_activity_get_specific(array('activity_ids' => array($post_id)));
-	
+              
 				if (!empty($custom_activities['activities'])) {
 					$activity = $custom_activities['activities'][0];
+
 					?>
 					<li class="activity activity_update activity-item animate-item slideInUp pinnedPosts" id="activity-<?php echo esc_attr($activity->id); ?>" data-bp-activity-id="<?php echo esc_attr($activity->id); ?>" data-bp-timestamp="<?php bp_nouveau_activity_timestamp($activity->id); ?>" style="visibility: visible; animation-name: slideInUp;border: 1px solid #90207952 !important;">
 						<div class="activity-avatar item-avatar">
@@ -226,7 +223,7 @@ class BuddyPressPinPosts {
                                     </span></a></div>
                                     <?php  if (is_user_logged_in() && current_user_can('administrator')) { ?>
 
-								<a href="javascript:void(0)" class="pin-post-button" data-post-id="<?php echo esc_attr($activity->id); ?>" data-action="unpin_post">Unpin</a>
+								<a href="javascript:void(0)" class="pin-post-button" data-user-id="<?php echo $activity->user_id; ?>" data-post-id="<?php echo esc_attr($activity->id); ?>" data-action="unpin_post">Unpin</a>
 								
                                 <?php } ?>
                                 <div class="generic-button reactions">
@@ -284,9 +281,14 @@ class BuddyPressPinPosts {
                             }
 
                             return $has_activities;
-	    }
+	}
+   
+  
 
-    function display_reactions_for_activity($activity_id) {
+
+
+
+        function display_reactions_for_activity($activity_id) {
            
             if ( ! class_exists( 'Buddy_Bridge_Activity_Reactions' ) ) {
                 echo 'Buddy Bridge Activity Reactions plugin is not active.';
@@ -321,7 +323,9 @@ class BuddyPressPinPosts {
                 
               
             }
-            
+             else {
+               // echo 'No reactions found for this activity.';
+            }
         }
 
         // Recursive function to display comments and their children
@@ -383,10 +387,10 @@ function display_comments($comments) {
                     if(current_user_can('administrator')){
                         ?>
 
-                    <div class="generic-button">
+<div class="generic-button">
 
-                    <a class="delete acomment-delete confirm bp-secondary-action" rel="nofollow" href="<?php echo home_url();?>/home-activity/delete/<?php echo $comment->id; ?>/?cid=<?php echo $comment->id; ?>&amp;_wpnonce=<?php echo wp_create_nonce('bp_activity_delete_link'); ?>">Delete</a>
-                    </div>
+<a class="delete acomment-delete confirm bp-secondary-action" rel="nofollow" href="<?php echo home_url();?>/home-activity/delete/<?php echo $comment->id; ?>/?cid=<?php echo $comment->id; ?>&amp;_wpnonce=<?php echo wp_create_nonce('bp_activity_delete_link'); ?>">Delete</a>
+</div>
                         <?php
                     }
                 }

@@ -4,6 +4,7 @@ jQuery(document).ready(function($) {
         e.preventDefault();
         console.log('clicked');
         var postId = $(this).data('post-id');
+        var userId = $(this).data('user-id');
         var action = $(this).data('action');
         var button = $(this);
 
@@ -15,7 +16,8 @@ jQuery(document).ready(function($) {
             type: 'POST',
             data: {
                 action: action,
-                post_id: postId
+                post_id: postId,
+                user_id: userId
             },
             success: function(response) {
                 if (response.success) {
@@ -44,11 +46,11 @@ jQuery(document).ready(function($) {
 document.addEventListener('DOMContentLoaded', function() {
 
     function afterActivityLoaded() {
-        $('.activity-list.item-list.bp-list.custom li').each(function() {
+        $('.activity-list.custom li').each(function() {
             var id = $(this).attr('id');
 
             // Remove the item from the non-custom list if it has the same ID
-            $('.activity-list.item-list.bp-list:not(.custom) li#' + id).remove();
+            $('.activity-list:not(.custom) li#' + id).remove();
         });
         //console.log('Activity items processed.');
 
@@ -94,6 +96,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Bind the function to the AJAX complete event
     $(document).ajaxComplete(handleAjaxComplete);
 
- 
+    // Trigger the function once after the initial page load
     setTimeout(afterActivityLoaded, 500); // Slight delay to ensure DOM updates
 });
